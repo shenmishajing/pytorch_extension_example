@@ -31,7 +31,7 @@ pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1
 pip install -r requirments.txt
 ```
 
-> Note that you have to install `pytorch` through `pip` instead of `conda`, because it will install another `nvcc` and will give you some trouble.
+> Note that you have to install `pytorch` through `pip` instead of `conda`, otherwise, it will install another `nvcc` and will give you some trouble.
 
 This project supports two methods to install the extensions: `cmake` and `setuptools`.
 
@@ -60,7 +60,9 @@ cmake --build build --config Debug --target all
 ```
 
 > Note that if you are not in the conda env, like using cmake tools in vscode, you have to set the `CMAKE_PREFIX_PATH` to the conda env path. You can set `-DCMAKE_PREFIX_PATH=<conda_env_path>` in the configure args of cmake tools.
+
 > You may need to set the compiler path manually, if you are in trouble about them. You can set `-DCMAKE_C_COMPILER=<gcc_path> -DCMAKE_CXX_COMPILER=<g++_path> -DCMAKE_CUDA_COMPILER=<nvcc_path>` to specify their path explicitly.
+
 > You can omit the `-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE` and `-G Ninja` args. They are used for lsp server. We will talk about them later.
 
 Then you can use the extension in Python:
@@ -121,6 +123,8 @@ Diagnostics:
 ```
 
 But, there is an issue of `clangd` about this, and you have to remove all the args not supported by `clangd` manually. I have provided a config file to remove all the args introduced by my `CMakeLists.txt` and not unsupported by `clangd`. You can get it from [here](https://github.com/shenmishajing/Setting-for-Mac/blob/master/config/clangd/config.yaml), and copy it to the project root and rename it to `.clangd`  or just copy it to the `.config` folder under the home dir to address this issue.
+
+> Note that, you have to pass `--enable-config` to clangd to enable the config file. Set it in `clangd.arguments` of vscode settings.
 
 ## The project
 
