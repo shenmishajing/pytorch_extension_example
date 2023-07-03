@@ -306,3 +306,44 @@ Also, the macro `AT_DISPATCH_FLOATING_TYPES_AND_HALF` dispatches the op to diffe
 Note that, unlike the cuda implementation, we do not need to use the kernel architecture for the cpu implementation. But, I recommend you to use this architecture, because you can implement the cpu part by just making a little modifycation like changing `cpu` to `cuda` and the `stride-loop` to a openmp loop.
 
 Again, you do not need to add a cpu implementation to the op. If you do not want to add a cpu implementation, you can just omit the `<op_name>_cpu.cpp` file.
+
+### pybind.cpp
+
+We have implemented the new op, but we have to bind it to the python module, before we can use it. As the `<op_name>_forward` func is the interface of the new op, we have to add the following code in `pybind.cpp`.
+
+```c++
+#include "cpp_helper.hpp"
+#include "<op1_name>.hpp"
+#include "<op2_name>.hpp"
+#include "<op3_name>.hpp"
+...
+#include "<opn_name>.hpp"
+
+TORCH_LIBRARY(ops, m)
+{
+    m.def("<op1_name>_forward", &<op1_name>_forward);
+    m.def("<op2_name>_forward", &<op2_name>_forward);
+    m.def("<op3_name>_forward", &<op3_name>_forward);
+    ...
+    m.def("<opn_name>_forward", &<opn_name>_forward);
+}
+
+PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
+{
+    m.def("<op1_name>_forward", &<op1_name>_forward, "<op1_name>_forward");
+    m.def("<op2_name>_forward", &<op2_name>_forward, "<op2_name>_forward");
+    m.def("<op3_name>_forward", &<op3_name>_forward, "<op3_name>_forward");
+    ...
+    m.def("<opn_name>_forward", &<opn_name>_forward, "<opn_name>_forward");
+}
+
+int main()
+{
+    // Any function you want to debug
+    return test_<op_name>_forward_cuda();
+}
+```
+
+If you use the `cmake` method, you need the `TORCH_LIBRARY` part, and if you use the `setup.py` method, you need the `PYBIND11_MODULE` part. You do not need to add both of them. We add both of them here, because we want to support the both methods.
+
+The `main` func is used for debugging, you can call any function you want in it to debug. You can also omit it if you do not want to debug, but, if you use the `cmake` method and build the `ops.out` target, you have to add a `main` func, even if just return 0.
